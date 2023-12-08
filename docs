@@ -1,0 +1,126 @@
+package fabricaapp;
+import javax.swing.*;
+import java.awt.event.*;
+import java.io.*;
+import java.util.ArrayList;
+
+// Clase para representar al proveedor
+class Proveedor implements Serializable {
+    private String nombre;
+    private String ci;
+    private int cantidadMateriaPrima;
+
+    public Proveedor(String nombre, String ci, int cantidadMateriaPrima) {
+        this.nombre = nombre;
+        this.ci = ci;
+        this.cantidadMateriaPrima = cantidadMateriaPrima;
+    }
+
+    // Getters y setters
+    public String getNombre() {
+        return nombre;
+    }
+
+    public String getCi() {
+        return ci;
+    }
+
+    public int getCantidadMateriaPrima() {
+        return cantidadMateriaPrima;
+    }
+}
+
+// Clase principal para la aplicación de la fábrica
+public class FabricaApp {
+    private ArrayList<Proveedor> listaProveedores = new ArrayList<>();
+
+    public void guardarProveedor(Proveedor proveedor) {
+        listaProveedores.add(proveedor);
+        try {
+            FileOutputStream fileOut = new FileOutputStream("proveedores.ser");
+            ObjectOutputStream out = new ObjectOutputStream(fileOut);
+            out.writeObject(listaProveedores);
+            out.close();
+            fileOut.close();
+            System.out.println("Datos del proveedor guardados correctamente.");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void mostrarProveedores() {
+        try {
+            FileInputStream fileIn = new FileInputStream("proveedores.ser");
+            ObjectInputStream in = new ObjectInputStream(fileIn);
+            ArrayList<Proveedor> proveedoresGuardados = (ArrayList<Proveedor>) in.readObject();
+            in.close();
+            fileIn.close();
+
+            System.out.println("Proveedores registrados:");
+            for (Proveedor proveedor : proveedoresGuardados) {
+                System.out.println("Nombre: " + proveedor.getNombre() +
+                                   ", CI: " + proveedor.getCi() +
+                                   ", Cantidad MP: " + proveedor.getCantidadMateriaPrima());
+            }
+        } catch (IOException | ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void main(String[] args) {
+        final FabricaApp fabrica = new FabricaApp();
+
+        // Crear y configurar la interfaz gráfica
+        JFrame frame = new JFrame("Registro de Proveedor");
+        JPanel panel = new JPanel();
+        JLabel labelNombre = new JLabel("Nombre del proveedor:");
+        final JTextField txtNombre = new JTextField(125);
+        JLabel labelCI = new JLabel("CI:");
+        final JTextField txtCI = new JTextField(125);
+        JLabel labelCantidadMP = new JLabel("Cantidad de Materia Prima:");
+        final JTextField txtCantidadMP = new JTextField(120);
+        JButton btnGuardar = new JButton("Guardar");
+        JButton btnMostrar = new JButton("Mostrar Proveedores");
+        JButton btnLimpiar = new JButton("Limpiar");
+
+        btnGuardar.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                String nombre = txtNombre.getText();
+                String ci = txtCI.getText();
+                int cantidadMP = Integer.parseInt(txtCantidadMP.getText());
+
+                Proveedor nuevoProveedor = new Proveedor(nombre, ci, cantidadMP);
+                fabrica.guardarProveedor(nuevoProveedor);
+            }
+        });
+
+        btnMostrar.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                fabrica.mostrarProveedores();
+            }
+        });
+
+        btnLimpiar.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                txtNombre.setText("");
+                txtCI.setText("");
+                txtCantidadMP.setText("");
+            }
+        });
+
+        panel.add(labelNombre);
+        panel.add(txtNombre);
+        panel.add(labelCI);
+        panel.add(txtCI);
+        panel.add(labelCantidadMP);
+        panel.add(txtCantidadMP);
+        panel.add(btnGuardar);
+        panel.add(btnMostrar);
+        panel.add(btnLimpiar);
+
+        frame.add(panel);
+        frame.setSize(2000, 1100);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setVisible(true);
+    }
+}
